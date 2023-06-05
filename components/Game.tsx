@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 interface GameProps {
   words: string[];
@@ -13,6 +13,8 @@ const Game: FC<GameProps> = ({ words }) => {
   const [letterStates, setLetterStates] = useState<boolean[]>([]);
   const [alphabetStates, setAlphabetStates] = useState<boolean[]>([]);
   const [tryCount, setTryCount] = useState(0);
+  const [showPopup, setShowPopup] = useState(false);
+  const [win, setWin] = useState(false); 
 
   // Function to handle word selection
   const selectWord = () => {
@@ -62,7 +64,33 @@ const Game: FC<GameProps> = ({ words }) => {
     }
   };
 
-  console.log(tryCount);
+  const resetGame = () => {
+    setShowPopup(false);
+    setWin(false)
+    selectWord();
+  }
+
+  useEffect(() => {
+    if (tryCount >= 6) {
+      setShowPopup(true)
+    } else {
+      var completed = true;
+      for (let i = 0; i < letterStates.length; i++) {
+        if (letterStates[i] == false) {
+          completed = false
+        }
+      }
+
+      if (completed) {
+        setWin(true)
+        setShowPopup(true)
+      }
+    }
+
+  }, [tryCount, letterStates]);
+
+  console.log(win)
+  console.log(tryCount)
   // Render the word and letter buttons
   const renderWord = () => {
     return word.split("").map((letter, index) => (
@@ -80,9 +108,12 @@ const Game: FC<GameProps> = ({ words }) => {
   };
 
   return (
-    <div className="bg-[rgba(0,0,0,.5)] pt-[50px] h-screen w-screen flex flex-col justify-center align-middle">
-      <div className="text-center text-[75px] mt-[20px]">Hangman</div>
-      {/* <div className="w-[200px] h-[200px] border-black border-[1px] rounded-[8px] absolute z-50 bg-white"></div> */}
+    <div className={`h-screen w-screen flex flex-col justify-center items-center ${showPopup ? "bg-[rgba(0,0,0,.5)]" : ''}`}>
+      <div className="text-center text-[75px]">Hangman</div>
+      {showPopup && <div className="w-[300px] h-[175px] border-black border-[1px] rounded-[8px] absolute z-50 bg-white flex flex-col text-center gap-[30px] items-center">
+        {win ? <div className="mt-[30px] text-[20px]">You Win!</div> : <div><div className="mt-[30px] text-[20px]">You Lose!</div></div>}
+        <button onClick={resetGame} className="border-black border-[1px] w-[50%] h-[50px] rounded-[8px] hover:bg-blue-500 hover:text-white">Play Again</button>
+      </div>}
       <div className="flex flex-col">
         <button onClick={selectWord} className="mt-[50px]">
           Select Word
