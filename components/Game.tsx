@@ -9,12 +9,13 @@ interface GameProps {
 const alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
 
 const Game: FC<GameProps> = ({ words }) => {
+  const [disableAll, setDisableAll] = useState(true);
   const [word, setWord] = useState("");
   const [letterStates, setLetterStates] = useState<boolean[]>([]);
   const [alphabetStates, setAlphabetStates] = useState<boolean[]>([]);
   const [tryCount, setTryCount] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
-  const [win, setWin] = useState(false); 
+  const [win, setWin] = useState(false);
 
   // Function to handle word selection
   const selectWord = () => {
@@ -65,32 +66,34 @@ const Game: FC<GameProps> = ({ words }) => {
   };
 
   const resetGame = () => {
+    setDisableAll(false);
     setShowPopup(false);
-    setWin(false)
+    setWin(false);
     selectWord();
-  }
+  };
 
   useEffect(() => {
-    if (tryCount >= 6) {
-      setShowPopup(true)
-    } else {
-      var completed = true;
-      for (let i = 0; i < letterStates.length; i++) {
-        if (letterStates[i] == false) {
-          completed = false
+    if (!disableAll) {
+      if (tryCount >= 6) {
+        setShowPopup(true);
+      } else {
+        var completed = true;
+        for (let i = 0; i < letterStates.length; i++) {
+          if (letterStates[i] == false) {
+            completed = false;
+          }
+        }
+
+        if (completed) {
+          setWin(true);
+          setShowPopup(true);
         }
       }
-
-      if (completed) {
-        setWin(true)
-        setShowPopup(true)
-      }
     }
+  }, [tryCount, letterStates, disableAll]);
 
-  }, [tryCount, letterStates]);
-
-  console.log(win)
-  console.log(tryCount)
+  console.log(win);
+  console.log(tryCount);
   // Render the word and letter buttons
   const renderWord = () => {
     return word.split("").map((letter, index) => (
@@ -108,22 +111,49 @@ const Game: FC<GameProps> = ({ words }) => {
   };
 
   return (
-    <div className={`h-screen w-screen flex flex-col justify-center items-center ${showPopup ? "bg-[rgba(0,0,0,.5)]" : ''}`}>
+    <div
+      className={`h-screen w-screen flex flex-col justify-center items-center ${
+        showPopup ? "bg-[rgba(0,0,0,.5)]" : ""
+      }`}
+    >
       <div className="text-center text-[75px]">Hangman</div>
-      {showPopup && <div className="w-[300px] h-[175px] border-black border-[1px] rounded-[8px] absolute z-50 bg-white flex flex-col text-center gap-[30px] items-center">
-        {win ? <div className="mt-[30px] text-[20px]">You Win!</div> : <div><div className="mt-[30px] text-[20px]">You Lose!</div></div>}
-        <button onClick={resetGame} className="border-black border-[1px] w-[50%] h-[50px] rounded-[8px] hover:bg-blue-500 hover:text-white">Play Again</button>
-      </div>}
+      {showPopup && (
+        <div className="w-[300px] h-[175px] border-black border-[1px] rounded-[8px] absolute z-50 bg-white flex flex-col text-center gap-[30px] items-center">
+          {win ? (
+            <div className="mt-[30px] text-[20px]">You Win!</div>
+          ) : (
+            <div>
+              <div className="mt-[30px] text-[20px]">You Lose!</div>
+              <div>The correct word was: {word}</div>
+            </div>
+          )}
+          <button
+            onClick={resetGame}
+            className="border-black border-[1px] w-[50%] h-[50px] rounded-[8px] hover:bg-blue-500 hover:text-white"
+          >
+            Play Again
+          </button>
+        </div>
+      )}
       <div className="flex flex-col">
-        <button onClick={selectWord} className="mt-[50px]">
-          Select Word
-        </button>
+        {disableAll ? (
+          <button onClick={resetGame} className="mt-[50px]">
+            Start Game
+          </button>
+        ) : (
+          <button onClick={selectWord} className="mt-[50px]">
+            Select Word
+          </button>
+        )}
         <div className="flex flex-row justify-center">
           <div className="mt-[100px] flex flex-row text-[30px] gap-[30px]">
             {renderWord()}
           </div>
         </div>
-        <div className="w-[60%] flex flex-row flex-wrap text-[40px] gap-[30px] justify-center mt-[100px] m-auto">
+        <div className="text-center mt-[50px]">
+          Guesses Remaining: {6 - tryCount}
+        </div>
+        <div className="w-[60%] flex flex-row flex-wrap text-[40px] gap-[30px] justify-center mt-[50px] m-auto">
           {alphabet.map((letter, index) => (
             <button
               key={index}
