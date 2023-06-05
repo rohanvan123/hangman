@@ -4,8 +4,7 @@ import Game from "@/components/Game";
 
 export default function Home() {
   return (
-    <div>
-      <div className="text-center text-[75px] mt-[50px]">Hangman</div>
+    <div className="w-full h-full">
       <Game words={words["words"]}></Game>
     </div>
   );
