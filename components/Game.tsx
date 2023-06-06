@@ -26,6 +26,7 @@ const Game: FC<GameProps> = ({ words }) => {
     setTryCount(0);
   };
 
+  
   // Function to toggle the state of a letter
   const toggleLetterState = (index: number) => {
     const selectedLetter = word[index];
